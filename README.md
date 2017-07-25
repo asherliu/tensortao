@@ -2,6 +2,7 @@
 Software requirement
 -----
 gcc 4.4.7 or 4.8.5
+
 OS: Linux, MacOS and Windows
 
 -----
@@ -23,7 +24,6 @@ Converter: edge tuples to CSR
 
 
 **Real example**:
-
 - Download https://snap.stanford.edu/data/com-Orkut.html file. **unzip** it. 
 - **./text_to_bin.bin soc-orkut.mtx 1 2(could change, depends on the number of lines are not edges)**
 - You will get *soc-orkut.mtx_beg_pos.bin* and *soc-orkut.mtx_csr.bin*. 
@@ -37,8 +37,8 @@ Graph reader
 - To execute: type "./graph_loader.bin", it will show you what is needed
 - You can use the converter converted graph to run this command. 
 
-**For example**:
-- /path/to/graph_loader.bin /path/to/beg_pos /path/to/csr /path/to/weight
+**Toy example from converter**:
+- ./graph_loader.bin ../tuple_text_to_binary_csr/toy_graph/toy.dat_beg_pos.bin  ../tuple_text_to_binary_csr/toy_graph/toy.dat_csr.bin ../tuple_text_to_binary_csr/toy_graph/toy.dat_weight.bin 
 
 ----
 Acknowledgement
