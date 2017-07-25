@@ -45,7 +45,7 @@ Further Development
 --------------
 This repo serves as the purpose of helping developers to, instead of distracted by coding tools to convert graph, immediately focusing on developing graph algorithms. 
 
-One example of using graph reader to develop BFS can be found here: https://github.com/mteverfresh/Multi-threaded-BFS
+One example of using graph reader to develop BFS can be found here: https://github.com/asherliu/Multi-threaded-BFS
 
 
 ----
