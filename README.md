@@ -40,6 +40,14 @@ Graph reader
 **Toy example from converter**:
 - ./graph_loader.bin ../tuple_text_to_binary_csr/toy_graph/toy.dat_beg_pos.bin  ../tuple_text_to_binary_csr/toy_graph/toy.dat_csr.bin ../tuple_text_to_binary_csr/toy_graph/toy.dat_weight.bin 
 
+--------
+Further Development
+--------------
+This repo serves as the purpose of helping developers to, instead of distracted by coding tools to convert graph, immediately focusing on developing graph algorithms. 
+
+One example of using graph reader to develop BFS can be found here: https://github.com/mteverfresh/Multi-threaded-BFS
+
+
 ----
 Acknowledgement
 ----
