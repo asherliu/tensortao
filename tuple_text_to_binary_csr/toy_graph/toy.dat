@@ -1,5 +1,5 @@
 #This is a toy graph from Enterprise SC '15
-#It contains 10 vertices, 13 directed graphs.
+#It contains 10 vertices, 13 undirected edges.
 0 1
 1 4 
 1 2
