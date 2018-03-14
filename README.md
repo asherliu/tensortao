@@ -24,10 +24,10 @@ Converter: edge tuples to CSR
 
 
 **Real example**:
-- Download https://snap.stanford.edu/data/com-Orkut.html file. **unzip** it. 
-- **./text_to_bin.bin soc-orkut.mtx 1 2(could change, depends on the number of lines are not edges)**
-- You will get *soc-orkut.mtx_beg_pos.bin* and *soc-orkut.mtx_csr.bin*. 
-- You could use these two files to run enterprise.
+- Download a graph file, e.g., **wget https://snap.stanford.edu/data/bigdata/communities/com-orkut.ungraph.txt.gz** file. 
+- Decompress the file, e.g., **gzip -d /path/to/com-orkut.ungraph.txt.gz**. 
+- Convert the edge list into binary CSR, e.g., **/path/to/text_to_bin.bin /path/to/com-orkut.ungraph.txt 1 2(could change, depends on the number of lines are not edges)**. This commandline will yield two files: */path/to/com-orkut.ungraph.txt_beg_pos.bin* and */path/to/com-orkut.ungraph.txt_csr.bin*. 
+- Then you can use these two files to run [enterprise](https://github.com/iHeartGraph/Enterprise).
 
 
 -----
