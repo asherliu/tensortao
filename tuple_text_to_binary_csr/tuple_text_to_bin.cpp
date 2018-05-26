@@ -154,27 +154,52 @@ int main(int argc, char** argv){
 	sprintf(filename,"%s_csr.bin",argv[1]);
 	int fd4 = open(filename,O_CREAT|O_RDWR,00666 );
 	ftruncate(fd4, edge_count*sizeof(vertex_t));
-	vertex_t* adj = (vertex_t*)mmap(NULL,edge_count*sizeof(vertex_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd4,0);
+	vertex_t* adj_file = (vertex_t*)mmap(NULL,edge_count*sizeof(vertex_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd4,0);
+	vertex_t* adj = (vertex_t*)mmap(NULL,
+			edge_count*sizeof(vertex_t),
+			PROT_READ|PROT_WRITE,
+			MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
 	assert(adj != MAP_FAILED);
-
+	assert(adj_file != MAP_FAILED);
+	//madvise(adj, edge_count*sizeof(vertex_t), MADV_RANDOM); //-- NOT work!
+//	msync(adj, edge_count*sizeof(vertex_t), MS_ASYNC); //-- NOT work!
+	
 	//added by Hang to generate a weight file
 	sprintf(filename,"%s_weight.bin",argv[1]);
 	int fd6 = open(filename,O_CREAT|O_RDWR,00666 );
 	ftruncate(fd6, edge_count*sizeof(vertex_t));
-	index_t* weight= (vertex_t*)mmap(NULL,edge_count*sizeof(vertex_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd6,0);
+	vertex_t* weight_file= (vertex_t*)mmap(NULL,edge_count*sizeof(vertex_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd6,0);
+	vertex_t* weight= (vertex_t*)mmap(NULL,
+			edge_count*sizeof(vertex_t),
+			PROT_READ|PROT_WRITE,
+			MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
 	assert(weight != MAP_FAILED);
+	assert(weight_file != MAP_FAILED);
 	//-End 
+//	madvise(weight, edge_count*sizeof(vertex_t), MADV_RANDOM);	//-- NOT WORK
+	//msync(weight, edge_count*sizeof(vertex_t), MS_ASYNC); //-- NOT work!
 
-	sprintf(filename,"%s_head.bin",argv[1]);
-	int fd5 = open(filename,O_CREAT|O_RDWR,00666 );
-	ftruncate(fd5, edge_count*sizeof(vertex_t));
-	vertex_t* head = (vertex_t*)mmap(NULL,edge_count*sizeof(vertex_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd5,0);
-	assert(head != MAP_FAILED);
+//	sprintf(filename,"%s_head.bin",argv[1]);
+//	int fd5 = open(filename,O_CREAT|O_RDWR,00666 );
+//	ftruncate(fd5, edge_count*sizeof(vertex_t));
+//	vertex_t* head = (vertex_t*)mmap(NULL,edge_count*sizeof(vertex_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd5,0);
+//	assert(head != MAP_FAILED);
 
-	sprintf(filename,"%s_deg.bin",argv[1]);
-	int fd2 = open(filename,O_CREAT|O_RDWR,00666 );
-	ftruncate(fd2, vert_count*sizeof(index_t));
-	index_t* degree = (index_t*)mmap(NULL,vert_count*sizeof(index_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd2,0);
+//-----------------------------
+//Avoid mmapped memory space for degree because 
+//**undirected** graph requires to random update degree array
+//This is a big problem for LUSTRE filesystem.
+//-------------------------------------------------
+//	sprintf(filename,"%s_deg.bin",argv[1]);
+//	int fd2 = open(filename,O_CREAT|O_RDWR,00666 );
+//	ftruncate(fd2, vert_count*sizeof(index_t));
+//	index_t* degree = (index_t*)mmap(NULL,vert_count*sizeof(index_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd2,0);
+	index_t *degree = (index_t *)mmap (NULL,
+                vert_count*sizeof(index_t),
+                PROT_READ | PROT_WRITE,
+                MAP_PRIVATE | MAP_ANONYMOUS,
+                -1,
+                0);
 	assert(degree != MAP_FAILED);
 	
 	sprintf(filename,"%s_beg_pos.bin",argv[1]);
@@ -192,8 +217,9 @@ int main(int argc, char** argv){
 	size_t offset =0;
 	curr=0;
 	next=0;
-
-	printf("Getting degree...\n");
+	
+	long progress = 1;
+	printf("Getting degree progress ...\n");
 	while(offset<line_count){
 		char* sss=ss+curr;
 		index = atol(sss)-v_min;
@@ -217,6 +243,11 @@ int main(int argc, char** argv){
 		curr = next;
 		degree[index]++;
 		if(is_reverse) degree[dest]++;
+		if(offset > progress)
+		{
+			printf("%f%%\n", offset*100.0/line_count);
+			progress <<=1;
+		}
 //		cout<<index<<" "<<degree[index]<<endl;
 
 		offset++;
@@ -225,7 +256,7 @@ int main(int argc, char** argv){
 	begin[0]=0;
 	begin[vert_count]=edge_count;
 
-	printf("Calculate beg_pos ...\n");
+	printf("\nCalculate beg_pos ...\n");
 	for(size_t i=1; i<vert_count; i++){
 		begin[i] = begin[i-1] + degree[i-1];
 //		cout<<begin[i]<<" "<<degree[i]<<endl;
@@ -238,7 +269,8 @@ int main(int argc, char** argv){
 	next = 0;
 	curr = 0;
 	
-	printf("Constructing CSR...\n");
+	progress = 1;
+	printf("\nConstructing CSR progress...\n");
 	while(offset<line_count){
 		char* sss=ss+curr;
 		index = atol(sss)-v_min;
@@ -262,7 +294,7 @@ int main(int argc, char** argv){
 			weight[begin[v_id]+degree[v_id]] = rand_weight;
 		//-End
 	
-		head[begin[index]+degree[index]]= index;
+		//head[begin[index]+degree[index]]= index;
 		while((ss[next]!=' ')&&(ss[next]!='\n')&&(ss[next]!='\t')){
 			next++;
 		}
@@ -272,9 +304,18 @@ int main(int argc, char** argv){
 		curr = next;
 		degree[index]++;
 		if(is_reverse) degree[v_id]++;
+		if(offset > progress)
+		{
+			printf("%f%%\n", offset*100.0/line_count);
+			progress <<=1;
+		}
 
 		offset++;
 	}
+	
+printf("Dumping CSR and weight arrays to disk ...\n");	
+	memcpy(adj_file, adj, edge_count*sizeof(vertex_t));
+	memcpy(weight_file, weight, edge_count*sizeof(vertex_t));
 	
 	//step 5
 	//print output as a test
@@ -282,7 +323,7 @@ int main(int argc, char** argv){
 	for(size_t i=0; i<(vert_count<8?vert_count:8); i++){
 		cout<<i<<" "<<begin[i+1]-begin[i]<<" ";
 		for(index_t j=begin[i]; j<begin[i+1]; j++){
-			cout<<adj[j]<<" ";
+			cout<<adj_file[j]<<" ";
 		}
 //		if(degree[i]>0){
 			cout<<endl;
@@ -298,16 +339,18 @@ int main(int argc, char** argv){
 	
 	//-Added by Hang
 	munmap( weight,sizeof(vertex_t)*edge_count );
+	munmap( weight_file,sizeof(vertex_t)*edge_count );
 	//-End
 
 	munmap( adj,sizeof(vertex_t)*edge_count );
-	munmap( head,sizeof(vertex_t)*edge_count );
+	munmap( adj_file,sizeof(vertex_t)*edge_count );
+//	munmap( head,sizeof(vertex_t)*edge_count );
 	munmap( begin,sizeof(index_t)*vert_count+1 );
 	munmap( degree,sizeof(index_t)*vert_count );
-	close(fd2);
+//	close(fd2);
 	close(fd3);
 	close(fd4);
-	close(fd5);
+//	close(fd5);
 	
 	//-Added by Hang
 	close(fd6);
