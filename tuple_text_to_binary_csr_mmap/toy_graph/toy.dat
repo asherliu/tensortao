@@ -1,0 +1,15 @@
+#This is a toy graph from Enterprise SC '15
+#It contains 10 vertices, 13 undirected edges.
+0 1
+0 4 
+1 2
+4 2
+4 7
+2 7
+2 5
+2 3
+3 5
+3 6
+5 8
+7 8
+8 9
