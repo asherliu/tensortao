@@ -153,28 +153,28 @@ int main(int argc, char** argv){
 	char filename[256];
 	sprintf(filename,"%s_csr.bin",argv[1]);
 	int fd4 = open(filename,O_CREAT|O_RDWR,00666 );
-	ftruncate(fd4, edge_count*sizeof(vertex_t));
-	vertex_t* adj_file = (vertex_t*)mmap(NULL,edge_count*sizeof(vertex_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd4,0);
+//	ftruncate(fd4, edge_count*sizeof(vertex_t));
+	//vertex_t* adj_file = (vertex_t*)mmap(NULL,edge_count*sizeof(vertex_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd4,0);
 	vertex_t* adj = (vertex_t*)mmap(NULL,
 			edge_count*sizeof(vertex_t),
 			PROT_READ|PROT_WRITE,
 			MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
 	assert(adj != MAP_FAILED);
-	assert(adj_file != MAP_FAILED);
+//	assert(adj_file != MAP_FAILED);
 	//madvise(adj, edge_count*sizeof(vertex_t), MADV_RANDOM); //-- NOT work!
 //	msync(adj, edge_count*sizeof(vertex_t), MS_ASYNC); //-- NOT work!
 	
 	//added by Hang to generate a weight file
 	sprintf(filename,"%s_weight.bin",argv[1]);
 	int fd6 = open(filename,O_CREAT|O_RDWR,00666 );
-	ftruncate(fd6, edge_count*sizeof(vertex_t));
-	vertex_t* weight_file= (vertex_t*)mmap(NULL,edge_count*sizeof(vertex_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd6,0);
+//	ftruncate(fd6, edge_count*sizeof(vertex_t));
+	//vertex_t* weight_file= (vertex_t*)mmap(NULL,edge_count*sizeof(vertex_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd6,0);
 	vertex_t* weight= (vertex_t*)mmap(NULL,
 			edge_count*sizeof(vertex_t),
 			PROT_READ|PROT_WRITE,
 			MAP_PRIVATE|MAP_ANONYMOUS,-1,0);
 	assert(weight != MAP_FAILED);
-	assert(weight_file != MAP_FAILED);
+//	assert(weight_file != MAP_FAILED);
 	//-End 
 //	madvise(weight, edge_count*sizeof(vertex_t), MADV_RANDOM);	//-- NOT WORK
 	//msync(weight, edge_count*sizeof(vertex_t), MS_ASYNC); //-- NOT work!
@@ -314,16 +314,18 @@ int main(int argc, char** argv){
 	}
 	
 printf("Dumping CSR and weight arrays to disk ...\n");	
-	memcpy(adj_file, adj, edge_count*sizeof(vertex_t));
-	memcpy(weight_file, weight, edge_count*sizeof(vertex_t));
-	
+//	memcpy(adj_file, adj, edge_count*sizeof(vertex_t));
+//	memcpy(weight_file, weight, edge_count*sizeof(vertex_t));
+	assert(write(fd4, adj, edge_count*sizeof(vertex_t))== edge_count*sizeof(vertex_t));
+	assert(write(fd6, weight, edge_count*sizeof(vertex_t))== edge_count*sizeof(vertex_t));
+
 	//step 5
 	//print output as a test
 //	for(size_t i=0; i<vert_count; i++){
 	for(size_t i=0; i<(vert_count<8?vert_count:8); i++){
 		cout<<i<<" "<<begin[i+1]-begin[i]<<" ";
 		for(index_t j=begin[i]; j<begin[i+1]; j++){
-			cout<<adj_file[j]<<" ";
+			cout<<adj[j]<<" ";
 		}
 //		if(degree[i]>0){
 			cout<<endl;
@@ -339,11 +341,11 @@ printf("Dumping CSR and weight arrays to disk ...\n");
 	
 	//-Added by Hang
 	munmap( weight,sizeof(vertex_t)*edge_count );
-	munmap( weight_file,sizeof(vertex_t)*edge_count );
+//	munmap( weight_file,sizeof(vertex_t)*edge_count );
 	//-End
 
 	munmap( adj,sizeof(vertex_t)*edge_count );
-	munmap( adj_file,sizeof(vertex_t)*edge_count );
+//	munmap( adj_file,sizeof(vertex_t)*edge_count );
 //	munmap( head,sizeof(vertex_t)*edge_count );
 	munmap( begin,sizeof(index_t)*vert_count+1 );
 	munmap( degree,sizeof(index_t)*vert_count );
