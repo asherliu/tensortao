@@ -12,24 +12,24 @@ int main(int args, char **argv)
 	
 	//template <file_vertex_t, file_index_t, file_weight_t
 	//new_vertex_t, new_index_t, new_weight_t>
-	graph<long, long, int, long, int, char>
+	graph<int, long, int, long, long, char>
 	*ginst = new graph
-	<long, long, int, long, int, char>
+	<int, long, int, long, long, char>
 	(beg_file,csr_file,weight_file);
     
     //**
     //You can implement your single threaded graph algorithm here.
     //like BFS, SSSP, PageRank and etc.
     
-    for(int i = 0; i < ginst->vert_count+1; i++)
-    {
-        int beg = ginst->beg_pos[i];
-        int end = ginst->beg_pos[i+1];
-        std::cout<<i<<"'s neighor list: ";
-        for(int j = beg; j < end; j++)
-            std::cout<<ginst->csr[j]<<" ";
-        std::cout<<"\n";
-    } 
+    //for(int i = 0; i < ginst->vert_count+1; i++)
+    //{
+    //    int beg = ginst->beg_pos[i];
+    //    int end = ginst->beg_pos[i+1];
+    //    std::cout<<i<<"'s neighor list: ";
+    //    for(int j = beg; j < end; j++)
+    //        std::cout<<ginst->csr[j]<<" ";
+    //    std::cout<<"\n";
+    //} 
      
 
 	return 0;	

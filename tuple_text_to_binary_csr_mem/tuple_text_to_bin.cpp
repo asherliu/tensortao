@@ -38,6 +38,9 @@
 #include <fcntl.h>
 #include <string.h>
 #include <assert.h>
+#include "wtime.h"
+
+#define SIZE_LIMIT (1<<31)
 
 #define INFTY int(1<<30)
 using namespace std;
@@ -59,13 +62,14 @@ int main(int argc, char** argv){
 	char* ss;
 	
 	std::cout<<"Input: ./exe tuple_file(text) "
-			<<"reverse_the_edge(1 reverse, 0 not reverse) lines_to_skip\n";
-	if(argc<4){printf("Wrong input\n");exit(-1);}
+			<<"reverse_the_edge(1 reverse, 0 not reverse) lines_to_skip thread_count\n";
+	if(argc<5){printf("Wrong input\n");exit(-1);}
 	
+
 	size_t file_size = fsize(argv[1]);
 	bool is_reverse=(atol(argv[2])==1);	
 	long skip_head=atol(argv[3]);
-	
+	int thread_count = atoi(argv[4]);
 
 	fd=open(argv[1],O_CREAT|O_RDWR,00666 );
 	if(fd == -1)
@@ -77,6 +81,10 @@ int main(int argc, char** argv){
 
 	ss_head = (char*)mmap(NULL,file_size,PROT_READ|PROT_WRITE,MAP_PRIVATE,fd,0);
 	assert(ss_head != MAP_FAILED);
+	madvise(ss_head, file_size, MADV_SEQUENTIAL);
+	double time_beg = wtime();
+	long progress = 1;
+
 	size_t head_offset=0;
 	int skip_count = 0;
 	while(true)
@@ -96,6 +104,11 @@ int main(int argc, char** argv){
 			skip_count++;
 			if(skip_count == skip_head) break;
 		}
+		if(head_offset > progress)
+		{
+			printf("%ld lines processed, %f seconds elapsed\n", head_offset, wtime() - time_beg);
+			progress <<=1;
+		}
 	}
 
 	ss = &ss_head[head_offset];
@@ -112,6 +125,7 @@ int main(int argc, char** argv){
 	vertex_t a;
 
 	//int reg = 0;
+	progress = 1;
 	while(next<file_size){
 		char* sss=ss+curr;
 		a = atol(sss);
@@ -132,10 +146,16 @@ int main(int argc, char** argv){
 			next++;
 		}
 		curr = next;
+		if(next > progress)
+		{
+			printf("%f%%, %f seconds elapsed\n", next*100.0/file_size, wtime() - time_beg);
+			progress <<=1;
+		}
 		
 		//one vertex is counted once
 		edge_count++;
 	}
+	//printf("%f seconds elapsed\n", wtime() - time_beg);
 	
 	const index_t line_count=edge_count>>1;
 	if(!is_reverse) edge_count >>=1;
@@ -152,8 +172,8 @@ int main(int argc, char** argv){
 	//step 2. each file size
 	char filename[256];
 	sprintf(filename,"%s_csr.bin",argv[1]);
-	int fd4 = open(filename,O_CREAT|O_RDWR,00666 );
-//	ftruncate(fd4, edge_count*sizeof(vertex_t));
+	int fd4 = open(filename,O_CREAT|O_RDWR|O_LARGEFILE,00666 );
+	ftruncate(fd4, edge_count*sizeof(vertex_t));
 	//vertex_t* adj_file = (vertex_t*)mmap(NULL,edge_count*sizeof(vertex_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd4,0);
 	vertex_t* adj = (vertex_t*)mmap(NULL,
 			edge_count*sizeof(vertex_t),
@@ -166,8 +186,8 @@ int main(int argc, char** argv){
 	
 	//added by Hang to generate a weight file
 	sprintf(filename,"%s_weight.bin",argv[1]);
-	int fd6 = open(filename,O_CREAT|O_RDWR,00666 );
-//	ftruncate(fd6, edge_count*sizeof(vertex_t));
+	int fd6 = open(filename,O_CREAT|O_RDWR|O_LARGEFILE,00666 );
+	ftruncate(fd6, edge_count*sizeof(vertex_t));
 	//vertex_t* weight_file= (vertex_t*)mmap(NULL,edge_count*sizeof(vertex_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd6,0);
 	vertex_t* weight= (vertex_t*)mmap(NULL,
 			edge_count*sizeof(vertex_t),
@@ -218,9 +238,12 @@ int main(int argc, char** argv){
 	curr=0;
 	next=0;
 	
-	long progress = 1;
 	printf("Getting degree progress ...\n");
-	while(offset<line_count){
+	progress = 1;
+#pragma omp parallel num_threads (thread_count)
+    {
+
+    while(offset<line_count){
 		char* sss=ss+curr;
 		index = atol(sss)-v_min;
 		while((ss[next]!=' ')&&(ss[next]!='\n')&&(ss[next]!='\t')){
@@ -245,13 +268,14 @@ int main(int argc, char** argv){
 		if(is_reverse) degree[dest]++;
 		if(offset > progress)
 		{
-			printf("%f%%\n", offset*100.0/line_count);
+			printf("%f%%, %f seconds elapsed\n", offset*100.0/line_count, wtime() - time_beg);
 			progress <<=1;
 		}
 //		cout<<index<<" "<<degree[index]<<endl;
 
 		offset++;
 	}
+    }
 //	exit(-1);
 	begin[0]=0;
 	begin[vert_count]=edge_count;
@@ -306,7 +330,7 @@ int main(int argc, char** argv){
 		if(is_reverse) degree[v_id]++;
 		if(offset > progress)
 		{
-			printf("%f%%\n", offset*100.0/line_count);
+			printf("%f%%, %f seconds elapsed\n", offset*100.0/line_count, wtime() - time_beg);
 			progress <<=1;
 		}
 
@@ -316,21 +340,45 @@ int main(int argc, char** argv){
 printf("Dumping CSR and weight arrays to disk ...\n");	
 //	memcpy(adj_file, adj, edge_count*sizeof(vertex_t));
 //	memcpy(weight_file, weight, edge_count*sizeof(vertex_t));
-	assert(write(fd4, adj, edge_count*sizeof(vertex_t))== edge_count*sizeof(vertex_t));
-	assert(write(fd6, weight, edge_count*sizeof(vertex_t))== edge_count*sizeof(vertex_t));
-
+	unsigned long long int to_write_size = edge_count*sizeof(vertex_t);
+	unsigned long long int to_write_off = 0;
+	std::cout<<"Adj Write "<<write(fd4, adj, edge_count*sizeof(vertex_t))<<" bytes and expect "<< edge_count*sizeof(vertex_t)<<" bytes\n";
+	std::cout<<"weight Write "<<write(fd6, weight, edge_count*sizeof(vertex_t))<<" bytes and expect "<< edge_count*sizeof(vertex_t)<<" bytes\n";
+    
+    
+//	while(to_write_size > 0)
+//	{
+//		if(to_write_size > SIZE_LIMIT)
+//        {   
+//            assert(pwrite(fd4, adj+to_write_off, SIZE_LIMIT, to_write_off) == SIZE_LIMIT);
+//            assert(pwrite(fd6, weight+to_write_off, SIZE_LIMIT, to_write_off) == SIZE_LIMIT);
+//        }
+//        else
+//        {
+//            assert(pwrite(fd4, adj+to_write_off, to_write_size, to_write_off) == to_write_size);
+//            assert(pwrite(fd6, weight+to_write_off, to_write_size, to_write_off) == to_write_size);
+//        }
+//
+//        to_write_size -= SIZE_LIMIT;
+//        to_write_off += SIZE_LIMIT;
+//        //- the last round maybe wrong to_write_size and to_write_off, but will already exit.
+//	}
+	
+	printf("%f seconds elapsed\n\n", wtime() - time_beg);
+	
+	
 	//step 5
 	//print output as a test
 //	for(size_t i=0; i<vert_count; i++){
-	for(size_t i=0; i<(vert_count<8?vert_count:8); i++){
-		cout<<i<<" "<<begin[i+1]-begin[i]<<" ";
-		for(index_t j=begin[i]; j<begin[i+1]; j++){
-			cout<<adj[j]<<" ";
-		}
-//		if(degree[i]>0){
-			cout<<endl;
+//	for(size_t i=0; i<(vert_count<8?vert_count:8); i++){
+//		cout<<i<<" "<<begin[i+1]-begin[i]<<" ";
+//		for(index_t j=begin[i]; j<begin[i+1]; j++){
+//			cout<<adj[j]<<" ";
 //		}
-	}
+////		if(degree[i]>0){
+//			cout<<endl;
+////		}
+//	}
 
 //	for(int i=0; i<edge_count; i++){
 //	for(int i=0; i<64; i++){

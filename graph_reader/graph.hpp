@@ -57,6 +57,7 @@ new_vert_t,new_index_t,new_weight_t>
 			perror("posix_memalign");
 		
 		ret=fread(tmp_csr, sizeof(file_vert_t), edge_count, file);
+        std::cout<<ret<<" "<<edge_count<<"\n";
 		assert(ret==edge_count);
 		assert(ret==beg_pos[vert_count]);
 		fclose(file);
