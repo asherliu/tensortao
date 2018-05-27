@@ -10,11 +10,17 @@ Code specification
 ---------
 The overall code structure of this project is:
 
-- **tuple_text_to_binary_csr**: Converting arbitrary *text format* edge tuple list file into Compressed Sparse Row (CSR) format binary file. 
+- **tuple_text_to_binary_csr_mmap**: converting tuple text list into binary CSR with **the following feature**. 
+> Directly back the **CSR** and **weight** arrays with files residing on disk, which has to synchronize udpates of **CSR** and **weight** to files on disk. Thus this design suffers from very slow processing speed in network-based file system (e.g., LUSTRE). Fortunately, this design is memory efficient comparing to **tuple_text_to_binary_csr**.
+
+- **tuple_text_to_binary_csr_extreme_graph**: converting tuple text list into binary CSR with **the following feature**. 
+> Split tuple list file to enhance parallelism, **fast** and **more complex**. There is a README.md file inside of this folder details the use.
+
+
+- **tuple_text_to_binary_csr_mem**: Converting arbitrary *text format* edge tuple list file into Compressed Sparse Row (CSR) format binary file. **Still have bugs**
 > Allocating **CSR** and **weight** arrays in memory. Once all updates to these two arrays are done, we dump them to disk.
 
-- **tuple_text_to_binary_csr_mmap**: the same as **tuple_text_to_binary_csr** but with **the following difference**. 
-> Directly back the **CSR** and **weight** arrays with files residing on disk, which has to synchronize udpates of **CSR** and **weight** to files on disk. Thus this design suffers from very slow processing speed in network-based file system (e.g., LUSTRE). Fortunately, this design is memory efficient comparing to **tuple_text_to_binary_csr**.
+
 
 - **graph_reader**: Reading the binary format CSR file into memory for graph computing.
 
