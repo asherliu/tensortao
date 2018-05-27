@@ -2,17 +2,35 @@
 Converter Specification
 -------------
 
-This converter tells you how to convert a text edge tuple into binary CSR format in parallel
+This tool requires all the following four components -- **run.bash**, **split_rename.bash**, **multi_bin_to_2d_csr** and **tuple_to_bin.multithread** to function. Further, one cannot change the relative paths of these files (or folders).
+
+**openmp** is needed to conduct this conversion.
 
 ----
-Step 1: Convert and Partition a Graph
+Step 1: Compile
 ---
-- Create a folder to store dataset: **mkdir -p sample_dataset; cd sample_dataset**
+* **make clean**: clean the binary executable from *tuple_to_bin.multithread* and *multi_bin_to_2d_csr*.
+* **make all**: compile binary executable for *tuple_to_bin.multithread* and *multi_bin_to_2d_csr*.
+
+
+-----
+Step 2: Run
+--------
+**Download graph datasets**: 
 - Download a text tuple list: **wget *https://snap.stanford.edu/data/bigdata/communities/com-orkut.ungraph.txt.gz***
 - Uncompress the tuple list file: **gzip -d com-orkut.ungraph.txt.gz**
-- To improve processing parallelism, you should split the file into a number of smaller files with our provided bash script: **../split_rename.bash com-orkut.ungraph.txt**
-- Count number of smaller files we get from prior step: **ls -l ./com-orkut.ungraph.txt-split\* | wc -l**
-- Convert those files into binary files: **../tuple_to_bin.multithread/text_to_bin.bin ./com-orkut.ungraph.txt-split 201 32 1**. To understand this command, you can type **../tuple_to_bin.multithread/text_to_bin.bin** to check the meanings of all input parameters which are **./exe fileprefix num_files numthreads rm_text_file (1 yes, 2 no)**. As such this commandline means, you have split the entire edge list file into **201** subfiles, you want to use **32** threads to convert this 201 text files into 201 binary subfiles. And you want to remove the text file after the conversion.
-- Convert those binary edge subfiles into binary CSR: **../multi_bin_to_2d_csr/multi_bin_to_2d_csr.bin ./com-orkut.ungraph.txt-split 201 2 2 32**. Again, you can type **../multi_bin_to_2d_csr/multi_bin_to_2d_csr.bin** to see the meaning of each input parameter. In this case, you will get **./exe file_header total_file_count num_rows num_cols num_threads**. Here **file_header**=./com-orkut.ungraph.txt-split, meaning the common header substring across all 201 binary subfiles, **total_file_count**=201, **num_rows**=2, **num_cols**=2 and **num_threads**=32.
 
-Eventually, you should get the following **8** files: **./com-orkut.ungraph.txt-split_beg.0_0_of_2x2.bin**, **./com-orkut.ungraph.txt-split_beg.0_1_of_2x2.bin**, **./com-orkut.ungraph.txt-split_beg.1_0_of_2x2.bin** and **./com-orkut.ungraph.txt-split_beg.1_1_of_2x2.bin**. **./com-orkut.ungraph.txt-split_csr.0_0_of_2x2.bin**, **./com-orkut.ungraph.txt-split_csr.0_1_of_2x2.bin**, **./com-orkut.ungraph.txt-split_csr.1_0_of_2x2.bin** and **./com-orkut.ungraph.txt-split_csr.1_1_of_2x2.bin**.
+**Command to convert the graph into binary CSR**: ./run.bash /path/to/run.bash/ /path/to/text_tuple_file line_skip num_row_partition num_col_partition num_threads reverse_the_edge(1 yes, 2 no) remove_intermediate_file(1 yes, 2 no). Below, we detail the meaning of each parameter.
+
+> * **/path/to/run.bash/**: absolute path to "run.bash".
+> * **/path/to/text_tuple_file**: absolute path to "text_tuple_file".
+> * **line_skip**: number of lines to skip in "text_tuple_file", these lines are often the description lines.
+> * **num_row_partition** and  **num_col_partition**: number of partitions in terms of row and column.
+> * **num_threads**: number of threads to conduct this conversion.
+> * **reverse_the_edge(1 yes, 2 no)**: whether to reverse the edges, 1 means reverse, 2 otherwise.
+> * **remove_intermediate_file(1 yes, 2 no)**: whether to remove the intermediate files, 1 means remove, 2 otherwise.
+
+- Example: ./run.bash /path/to/run.bash /path/to/com-orkut.ungraph 4 1 1 20 1 1.
+
+
+Eventually, this command will tell you the newly generated binary files for your CSR representation.
