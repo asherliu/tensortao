@@ -38,15 +38,15 @@ int main(int args, char **argv)
 		
 	/*figure out normal 2d partition row and col ranger*/
 	double tm_part = wtime();
-	//p2d_partition<index_t, vertex_t, file_vertex_t>
-	//	(row_ranger, col_ranger, prefix, file_count, num_thds, 
-	//	 max_vert + 1, num_rows, num_cols);
+	p2d_partition<index_t, vertex_t, file_vertex_t>
+		(row_ranger, col_ranger, prefix, file_count, num_thds, 
+		 max_vert + 1, num_rows, num_cols);
 
 
 	/*ultra balanced 2d partition row and col ranger*/
-	ultra_balanced_2d_partition<index_t, vertex_t, file_vertex_t>
-		(row_ranger, col_ranger, prefix, file_count, num_thds, 
-		 max_vert + 1, edge_count, num_rows, num_cols);
+//	ultra_balanced_2d_partition<index_t, vertex_t, file_vertex_t>
+//		(row_ranger, col_ranger, prefix, file_count, num_thds, 
+//		 max_vert + 1, edge_count, num_rows, num_cols);
 	tm_part = wtime() - tm_part;
 
 

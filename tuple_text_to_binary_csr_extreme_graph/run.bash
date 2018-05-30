@@ -10,7 +10,7 @@ fi
 
 path=$1
 file=$2
-line_skip=$3
+skip_line=$3
 num_row=$4
 num_col=$5
 num_threads=$6
@@ -46,7 +46,9 @@ fi
 echo "Skip lines ..."
 
 rm -rf "$file".skip
-tail -n +$((skip_line + 1)) $file &>> "$file".skip
+skip_line=$((skip_line+1))
+echo "tail -n +$skip_line $file"
+tail -n +$skip_line $file &>> "$file".skip
 
 
 $path/split_rename.bash "$file".skip 
