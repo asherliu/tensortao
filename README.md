@@ -13,11 +13,15 @@ The overall code structure of this project is:
 - **tuple_text_to_binary_csr_mmap**: converting tuple text list into binary CSR with **the following feature**. 
 > Directly back the **CSR** and **weight** arrays with files residing on disk, which has to synchronize udpates of **CSR** and **weight** to files on disk. Thus this design suffers from very slow processing speed in network-based file system (e.g., LUSTRE). Fortunately, this design is memory efficient comparing to **tuple_text_to_binary_csr**.
 
+> This source code generate **symmetric weights**, that is, in undirected graph, a->b weight = b->a weight.
+
 - **tuple_text_to_binary_csr_extreme_graph**: converting tuple text list into binary CSR with **the following feature**. 
 > Split tuple list file to enhance parallelism, **fast** and **more complex**. There is a README.md file inside of this folder details the use.
 
+> This source code cannot generate weights.
 
-- **tuple_text_to_binary_csr_mem**: Converting arbitrary *text format* edge tuple list file into Compressed Sparse Row (CSR) format binary file. **Still have bugs**
+- **tuple_text_to_binary_csr_mem**: **Still have bugs** 
+Converting arbitrary *text format* edge tuple list file into Compressed Sparse Row (CSR) format binary file. 
 > Allocating **CSR** and **weight** arrays in memory. Once all updates to these two arrays are done, we dump them to disk.
 
 
