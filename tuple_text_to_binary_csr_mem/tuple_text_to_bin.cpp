@@ -40,7 +40,7 @@
 #include <assert.h>
 #include "wtime.h"
 
-#define SIZE_LIMIT (1<<31)
+#define SIZE_LIMIT (1<<30)
 
 #define INFTY int(1<<30)
 using namespace std;
@@ -160,7 +160,7 @@ int main(int argc, char** argv){
 	const index_t line_count=edge_count>>1;
 	if(!is_reverse) edge_count >>=1;
 	
-	vert_count = v_max - v_min + 1;
+	vert_count = v_max + 1;
 	assert(v_min<INFTY);
 	cout<<"edge count: "<<edge_count<<endl;
 	cout<<"max vertex id: "<<v_max<<endl;
@@ -172,8 +172,11 @@ int main(int argc, char** argv){
 	//step 2. each file size
 	char filename[256];
 	sprintf(filename,"%s_csr.bin",argv[1]);
-	int fd4 = open(filename,O_CREAT|O_RDWR|O_LARGEFILE,00666 );
-	ftruncate(fd4, edge_count*sizeof(vertex_t));
+	//int fd4 = open(filename,O_CREAT|O_RDWR|O_LARGEFILE,00666 );
+    FILE *fd4 = fopen64(filename, "wb");
+    assert(fd4 != NULL);
+
+	//ftruncate(fd4, edge_count*sizeof(vertex_t));
 	//vertex_t* adj_file = (vertex_t*)mmap(NULL,edge_count*sizeof(vertex_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd4,0);
 	vertex_t* adj = (vertex_t*)mmap(NULL,
 			edge_count*sizeof(vertex_t),
@@ -186,8 +189,11 @@ int main(int argc, char** argv){
 	
 	//added by Hang to generate a weight file
 	sprintf(filename,"%s_weight.bin",argv[1]);
-	int fd6 = open(filename,O_CREAT|O_RDWR|O_LARGEFILE,00666 );
-	ftruncate(fd6, edge_count*sizeof(vertex_t));
+	//int fd6 = open(filename,O_CREAT|O_RDWR|O_LARGEFILE,00666 );
+    FILE *fd6  = fopen64(filename, "wb");
+    assert(fd6 != NULL);
+
+	//ftruncate(fd6, edge_count*sizeof(vertex_t));
 	//vertex_t* weight_file= (vertex_t*)mmap(NULL,edge_count*sizeof(vertex_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd6,0);
 	vertex_t* weight= (vertex_t*)mmap(NULL,
 			edge_count*sizeof(vertex_t),
@@ -240,12 +246,10 @@ int main(int argc, char** argv){
 	
 	printf("Getting degree progress ...\n");
 	progress = 1;
-#pragma omp parallel num_threads (thread_count)
-    {
 
     while(offset<line_count){
 		char* sss=ss+curr;
-		index = atol(sss)-v_min;
+		index = atol(sss);
 		while((ss[next]!=' ')&&(ss[next]!='\n')&&(ss[next]!='\t')){
 			next++;
 		}
@@ -255,7 +259,7 @@ int main(int argc, char** argv){
 		curr = next;
 
 		char* sss1=ss+curr;
-		dest=atol(sss1)-v_min;
+		dest=atol(sss1);
 
 		while((ss[next]!=' ')&&(ss[next]!='\n')&&(ss[next]!='\t')){
 			next++;
@@ -275,7 +279,6 @@ int main(int argc, char** argv){
 
 		offset++;
 	}
-    }
 //	exit(-1);
 	begin[0]=0;
 	begin[vert_count]=edge_count;
@@ -297,7 +300,7 @@ int main(int argc, char** argv){
 	printf("\nConstructing CSR progress...\n");
 	while(offset<line_count){
 		char* sss=ss+curr;
-		index = atol(sss)-v_min;
+		index = atol(sss);
 		while((ss[next]!=' ')&&(ss[next]!='\n')&&(ss[next]!='\t')){
 			next++;
 		}
@@ -307,7 +310,7 @@ int main(int argc, char** argv){
 		curr = next;
 
 		char* sss1=ss+curr;
-		v_id = atol(sss1)-v_min;
+		v_id = atol(sss1);
 		adj[begin[index]+degree[index]] = v_id;
 		if(is_reverse) adj[begin[v_id]+degree[v_id]] = index;
 		
@@ -337,24 +340,30 @@ int main(int argc, char** argv){
 		offset++;
 	}
 	
-printf("Dumping CSR and weight arrays to disk ...\n");	
+	
+    long long int to_write_size = edge_count*sizeof(vertex_t);
+    long long int to_write_off = 0;
+    std::cout<<"Dumping "<<to_write_size<<" bytes CSR and weight arrays to disk ...\n";	
 //	memcpy(adj_file, adj, edge_count*sizeof(vertex_t));
 //	memcpy(weight_file, weight, edge_count*sizeof(vertex_t));
-	unsigned long long int to_write_size = edge_count*sizeof(vertex_t);
-	unsigned long long int to_write_off = 0;
-	std::cout<<"Adj Write "<<write(fd4, adj, edge_count*sizeof(vertex_t))<<" bytes and expect "<< edge_count*sizeof(vertex_t)<<" bytes\n";
-	std::cout<<"weight Write "<<write(fd6, weight, edge_count*sizeof(vertex_t))<<" bytes and expect "<< edge_count*sizeof(vertex_t)<<" bytes\n";
+	//std::cout<<"Adj Write "<<write(fd4, adj, edge_count*sizeof(vertex_t))<<" bytes and expect "<< edge_count*sizeof(vertex_t)<<" bytes\n";
+	//std::cout<<"weight Write "<<write(fd6, weight, edge_count*sizeof(vertex_t))<<" bytes and expect "<< edge_count*sizeof(vertex_t)<<" bytes\n";
     
+	std::cout<<"Adj Write "<<fwrite(adj, edge_count, sizeof(vertex_t), fd4)<<" bytes and expect "<< edge_count*sizeof(vertex_t)<<" bytes\n";
+	std::cout<<"weight Write "<<fwrite(weight, edge_count, sizeof(vertex_t), fd6)<<" bytes and expect "<< edge_count*sizeof(vertex_t)<<" bytes\n";
     
+  
 //	while(to_write_size > 0)
 //	{
 //		if(to_write_size > SIZE_LIMIT)
 //        {   
+//            std::cout<<"Write "<<SIZE_LIMIT<<" bytes\n";
 //            assert(pwrite(fd4, adj+to_write_off, SIZE_LIMIT, to_write_off) == SIZE_LIMIT);
 //            assert(pwrite(fd6, weight+to_write_off, SIZE_LIMIT, to_write_off) == SIZE_LIMIT);
 //        }
 //        else
 //        {
+//            std::cout<<"Write "<<to_write_size<<" bytes\n";
 //            assert(pwrite(fd4, adj+to_write_off, to_write_size, to_write_off) == to_write_size);
 //            assert(pwrite(fd6, weight+to_write_off, to_write_size, to_write_off) == to_write_size);
 //        }
@@ -399,10 +408,12 @@ printf("Dumping CSR and weight arrays to disk ...\n");
 	munmap( degree,sizeof(index_t)*vert_count );
 //	close(fd2);
 	close(fd3);
-	close(fd4);
+//	close(fd4);
 //	close(fd5);
 	
 	//-Added by Hang
-	close(fd6);
+//	close(fd6);
+    fclose(fd4);
+    fclose(fd6);
 	//-End
 }
