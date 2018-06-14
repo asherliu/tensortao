@@ -12,9 +12,9 @@ int main(int args, char **argv)
 	
 	//template <file_vertex_t, file_index_t, file_weight_t
 	//new_vertex_t, new_index_t, new_weight_t>
-	graph<int, long, int, long, long, char>
+	graph<long, long, int, long, long, char>
 	*ginst = new graph
-	<int, long, int, long, long, char>
+	<long, long, int, long, long, char>
 	(beg_file,csr_file,weight_file);
     
     //**
