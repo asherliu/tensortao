@@ -21,7 +21,7 @@ The overall code structure of this project is:
 > Split tuple list file to enhance parallelism, **fast** and **more complex**. There is a README.md file inside of this folder details the use.
 > ```This source code CANNOT generate weights.```
 
-- **tuple_text_to_binary_csr_mem**: **Still have bugs** 
+- **tuple_text_to_binary_csr_mem**:
 Converting arbitrary *text format* edge tuple list file into Compressed Sparse Row (CSR) format binary file. 
 > Allocating **CSR** and **weight** arrays in memory. Once all updates to these two arrays are done, we dump them to disk.
 
