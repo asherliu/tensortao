@@ -5,6 +5,21 @@ gcc 4.4.7 or 4.8.5
 
 OS: Linux, MacOS and Windows
 
+-----------
+Graph format basics
+----------------------
+![Alt text](/images/intr_graph.png)
+
+Given a graph G = (V, E, W), as shown in (a), mainstream storage formats are (b) edge (tuple) list format and (c) *Compressed sparse row* (CSR) format. Note, V, E and W stand for the sets of vertices, edges and weights of the graph G.
+
+**CSR format**: is firstly introduced to store [sparse matrices](http://netlib.org/utk/papers/templates/node91.html). When it comes to graph, we assume each source vertex to be one row of the matrix, and all the destination vertices (originated from the same source vertex) as column indices for the *non-zero* (nnz) entries of this row. The edge weight resembles the content of the corresponding nnz entry. CSR only stores the destination vertices and edge weights in **Adjacency list** and **Weight list**. Further, the **Begin position** array is used to describe the ranges of destination vertices (also edge weights) for every row. Because the begin index of vertex *n+1* is the end index for vertex *n*. Consequently, a dedicated end index array is unnecessary, except one extra entry at the end of the begin position array to indicate the end index of the destination vertices for the last source vertex, as shown in (c).  
+
+In summary, CSR space consumptions are: 
+- Begin position: |V| + 1 entries.
+- Adjacency list: |E| entries. 
+- Weight list: |E| entries.
+
+
 -----
 Code specification
 ---------
