@@ -16,11 +16,19 @@ Step 1: Compile
 -----
 Step 2: Run
 --------
-**Download graph datasets**: 
-- Download a text tuple list: **wget *https://snap.stanford.edu/data/bigdata/communities/com-orkut.ungraph.txt.gz***
-- Uncompress the tuple list file: **gzip -d com-orkut.ungraph.txt.gz**
+- Download a text tuple list
+```
+wget https://snap.stanford.edu/data/bigdata/communities/com-orkut.ungraph.txt.gz
+```
+- Uncompress the tuple list file: 
+```
+gzip -d com-orkut.ungraph.txt.gz
+```
 
-**Command to convert the graph into binary CSR**: ./run.bash /path/to/run.bash/ /path/to/text_tuple_file line_skip num_row_partition num_col_partition num_threads reverse_the_edge(1 yes, 2 no) remove_intermediate_file(1 yes, 2 no). Below, we detail the meaning of each parameter.
+- Command to convert the graph into binary CSR, and a brief parameter explanation:
+```
+./run.bash /path/to/run.bash/ /path/to/text_tuple_file line_skip num_row_partition num_col_partition num_threads reverse_the_edge(1 yes, 2 no) remove_intermediate_file(1 yes, 2 no). Below, we detail the meaning of each parameter.
+```
 
 > * **/path/to/run.bash/**: absolute path to "run.bash".
 > * **/path/to/text_tuple_file**: absolute path to "text_tuple_file".
