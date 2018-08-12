@@ -312,7 +312,14 @@ int main(int argc, char** argv){
 		char* sss1=ss+curr;
 		v_id = atol(sss1);
 		adj[begin[index]+degree[index]] = v_id;
-		if(is_reverse) adj[begin[v_id]+degree[v_id]] = index;
+		//Added by Zhenlin
+	        if(is_reverse){
+	            if(v_id==index) //self-loop
+                 	adj[begin[v_id]+degree[v_id] + 1] = index;
+             	    else // normal case
+                 	adj[begin[v_id]+degree[v_id]] = index;
+        	}
+		//if(is_reverse) adj[begin[v_id]+degree[v_id]] = index;
 		
 		//Added by Hang
 		int rand_weight=(rand()%63+1);
