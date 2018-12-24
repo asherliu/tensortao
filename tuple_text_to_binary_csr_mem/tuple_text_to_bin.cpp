@@ -142,7 +142,7 @@ int main(int argc, char** argv){
 		while((ss[next]!=' ')&&(ss[next]!='\n')&&(ss[next]!='\t')){
 			next++;
 		}
-		while((ss[next]==' ')||(ss[next]=='\n')||(ss[next]=='\t')){
+		while((ss[next]==' ')||(ss[next]=='\n')||(ss[next]=='\t')||(ss[next]=='\r')){
 			next++;
 		}
 		curr = next;
@@ -264,7 +264,7 @@ int main(int argc, char** argv){
 		while((ss[next]!=' ')&&(ss[next]!='\n')&&(ss[next]!='\t')){
 			next++;
 		}
-		while((ss[next]==' ')||(ss[next]=='\n')||(ss[next]=='\t')){
+		while((ss[next]==' ')||(ss[next]=='\n')||(ss[next]=='\t')||(ss[next]=='\r')){
 			next++;
 		}
 		curr = next;
@@ -304,7 +304,7 @@ int main(int argc, char** argv){
 		while((ss[next]!=' ')&&(ss[next]!='\n')&&(ss[next]!='\t')){
 			next++;
 		}
-		while((ss[next]==' ')||(ss[next]=='\n')||(ss[next]=='\t')){
+		while((ss[next]==' ')||(ss[next]=='\n')||(ss[next]=='\t')||(ss[next]=='\r')){
 			next++;
 		}
 		curr = next;
@@ -332,7 +332,7 @@ int main(int argc, char** argv){
 		while((ss[next]!=' ')&&(ss[next]!='\n')&&(ss[next]!='\t')){
 			next++;
 		}
-		while((ss[next]==' ')||(ss[next]=='\n')||(ss[next]=='\t')){
+		while((ss[next]==' ')||(ss[next]=='\n')||(ss[next]=='\t')||(ss[next]=='\r')){
 			next++;
 		}
 		curr = next;
