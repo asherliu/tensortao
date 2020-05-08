@@ -75,11 +75,45 @@ Further Development
 --------------
 This repo serves as the purpose of helping developers to, instead of distracted by coding tools to convert graph, immediately focusing on developing graph algorithms, such as, BFS, SSSP, PageRank, and etc.
 
+For instance, you can directly code up your BFS, SSSP, PageRank and etc algorithms at [line 20-32 of the main.cpp in graph_reader](https://github.com/asherliu/graph_project_start/blob/master/graph_reader/main.cpp#L20-L32) which is detailed as follows:
+>
+	
+	//template <file_vertex_t, file_index_t, file_weight_t
+	//new_vertex_t, new_index_t, new_weight_t>
+	graph<long, long, int, long, long, char>
+	*ginst = new graph
+	<long, long, int, long, long, char>
+	(beg_file,csr_file,weight_file);
+    
+    //**line 20 - 32 
+    //You can implement your single threaded graph algorithm here.
+    //like BFS, SSSP, PageRank and etc.
+    
+    //for(int i = 0; i < ginst->vert_count+1; i++)
+    //{
+    //    int beg = ginst->beg_pos[i];
+    //    int end = ginst->beg_pos[i+1];
+    //    std::cout<<i<<"'s neighor list: ";
+    //    for(int j = beg; j < end; j++)
+    //        std::cout<<ginst->csr[j]<<" ";
+    //    std::cout<<"\n";
+    //} 
+     
+
+
+
 
 ----
 Acknowledgement
 ----
-The toy graph is based on the example of Figure 1 in the following paper:
 
-[SC '15] Enterprise: Breadth-First Graph Traversal on GPUs [[PDF](http://hang-liu.com/publication/enterprise_sc15.pdf)] [[Slides](http://hang-liu.com/publication/enterprise_slides.pdf)] [[Blog](http://hang-liu.com/enterprise_blog.html)]
+[SC  '15] Enterprise: Breadth-First Graph Traversal on GPUs [[PDF](http://personal.stevens.edu/~hliu77/docs/sc15.pdf)]
+
+[FAST'17] Graphene: Fine-Grained IO Management for Graph Computing [[PDF](http://personal.stevens.edu/~hliu77/docs/fast17.pdf)]
+
+[HPDC'19] XBFS: eXploring Runtime Optimizations for Breadth-First Search on GPUs [[PDF](http://personal.stevens.edu/~hliu77/docs/hpdc19.pdf)]
+
+[DAC '19] Dr. BFS: Data Centric Breadth-First Search on FPGAs [[PDF](http://personal.stevens.edu/~hliu77/docs/dac19.pdf)]
+
+[ATC '19] SIMD-X: Programming and Processing of Graph Algorithms on GPUs [[PDF](http://personal.stevens.edu/~hliu77/docs/usenix-atc19.pdf)]
 
