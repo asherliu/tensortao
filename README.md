@@ -119,3 +119,4 @@ Acknowledgement
 
 [SC '20] C-SAW: a framework for graph sampling and random walk on GPUs [[PDF](https://personal.stevens.edu/~hliu77/docs/SC20.pdf)]
 
+[TPDS '21] GSOFA: Scalable Sparse Symbolic LU Factorization on GPUs [[PDF](https://personal.stevens.edu/~hliu77/docs/tpds21b.pdf)]
