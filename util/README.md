@@ -99,24 +99,3 @@ For instance, you can directly code up your BFS, SSSP, PageRank and etc algorith
     //    std::cout<<"\n";
     //} 
      
-
-
-
-
-----
-Acknowledgement
-----
-
-[SC  '15] Enterprise: Breadth-First Graph Traversal on GPUs [[PDF](http://personal.stevens.edu/~hliu77/docs/sc15.pdf)]
-
-[FAST'17] Graphene: Fine-Grained IO Management for Graph Computing [[PDF](http://personal.stevens.edu/~hliu77/docs/fast17.pdf)]
-
-[HPDC'19] XBFS: eXploring Runtime Optimizations for Breadth-First Search on GPUs [[PDF](http://personal.stevens.edu/~hliu77/docs/hpdc19.pdf)]
-
-[DAC '19] Dr. BFS: Data Centric Breadth-First Search on FPGAs [[PDF](http://personal.stevens.edu/~hliu77/docs/dac19.pdf)]
-
-[USENIX ATC '19] SIMD-X: Programming and Processing of Graph Algorithms on GPUs [[PDF](http://personal.stevens.edu/~hliu77/docs/usenix-atc19.pdf)]
-
-[SC '20] C-SAW: a framework for graph sampling and random walk on GPUs [[PDF](https://personal.stevens.edu/~hliu77/docs/SC20.pdf)]
-
-[TPDS '21] GSOFA: Scalable Sparse Symbolic LU Factorization on GPUs [[PDF](https://personal.stevens.edu/~hliu77/docs/tpds21b.pdf)]
