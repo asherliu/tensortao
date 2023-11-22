@@ -8,7 +8,7 @@ OS: Linux, MacOS and Windows
 -----------
 Graph format basics
 ----------------------
-![Alt text](/images/intr_graph.png)
+![Alt text](/util/images/intr_graph.png)
 
 Given a graph G = (V, E, W), as shown in (a), mainstream storage formats are (b) edge (tuple) list format and (c) *Compressed sparse row* (CSR) format. Note, V, E and W stand for the sets of vertices, edges and weights of the graph G, respectively.
 
